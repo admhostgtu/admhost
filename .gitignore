@@ -1,0 +1,29 @@
+# Environnement (secrets — ne jamais versionner)
+.env
+.env.local
+.env.production
+
+# Garder les templates versionnés
+!.env.example
+!deploy/env.production
+
+# Storage (logs, cache, backups)
+storage/logs/*
+storage/cache/*
+storage/backups/*
+!storage/logs/.gitkeep
+!storage/cache/.gitkeep
+!storage/backups/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PHP
+vendor/

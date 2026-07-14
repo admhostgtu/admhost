@@ -1,0 +1,16 @@
+# Sudoers pour l'utilisateur provisioner (sans mot de passe)
+# Copier dans /etc/sudoers.d/admhost-provisioner
+# chmod 440 /etc/sudoers.d/admhost-provisioner
+#
+# Créer l'utilisateur :
+#   useradd -r -m -s /bin/bash provisioner
+#   usermod -aG www-data provisioner
+
+provisioner ALL=(root) NOPASSWD: /usr/sbin/useradd
+provisioner ALL=(root) NOPASSWD: /usr/sbin/chpasswd
+provisioner ALL=(root) NOPASSWD: /usr/bin/mkdir
+provisioner ALL=(root) NOPASSWD: /usr/bin/tee
+provisioner ALL=(root) NOPASSWD: /usr/bin/chmod
+provisioner ALL=(root) NOPASSWD: /usr/bin/chown
+provisioner ALL=(root) NOPASSWD: /usr/bin/id
+provisioner ALL=(root) NOPASSWD: /usr/bin/ssh-keygen

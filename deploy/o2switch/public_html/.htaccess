@@ -1,0 +1,35 @@
+# O2Switch — public_html/.htaccess
+# Document root : ~/public_html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Bloquer accès aux fichiers sensibles
+<Files ".env">
+    Require all denied
+</Files>
+
+<FilesMatch "\.(env|log|sql|sh|md|gitignore)$">
+    Require all denied
+</FilesMatch>
+
+# Interdire accès aux dossiers internes (si mal configurés)
+RedirectMatch 403 ^/(shared|scripts|storage|backend|admin|admhost)/
+
+# Headers sécurité
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'"
+</IfModule>
+
+# Désactiver listing répertoires
+Options -Indexes

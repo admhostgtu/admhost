@@ -1,0 +1,28 @@
+# Commandes manuelles equivalentes (si vous preferez ne pas utiliser le script)
+#
+# === 1. Installer PHP via winget ===
+# winget install PHP.PHP.8.3
+#
+# === 2. Ajouter PHP au PATH (session courante) ===
+# $env:Path = "C:\php;$env:Path"
+#
+# === 3. Ajouter PHP au PATH (permanent, utilisateur) ===
+# [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\php", "User")
+#
+# === 4. Creer php.ini et activer pdo_mysql ===
+# copy C:\php\php.ini-development C:\php\php.ini
+# notepad C:\php\php.ini
+#   -> extension_dir = "C:\php\ext"
+#   -> decommenter : extension=pdo_mysql
+#   -> decommenter : extension=mysqli
+#
+# === 5. Verifier pdo_mysql ===
+# php -m | findstr pdo_mysql
+#
+# === 6. Creer la base de donnees ===
+# mysql -u root -e "CREATE DATABASE IF NOT EXISTS admhost CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+#
+# === 7. Migration + seed + demarrage ===
+# php scripts/migrate.php
+# php scripts/seed.php
+# scripts\dev\start-local.bat

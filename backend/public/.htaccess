@@ -1,0 +1,21 @@
+# Apache — backend/public (Scaleway VPS)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Bloquer fichiers sensibles
+<Files ".env">
+    Require all denied
+</Files>
+
+<FilesMatch "\.(env|log|sql|sh|md|gitignore|bak)$">
+    Require all denied
+</FilesMatch>
+
+RedirectMatch 403 ^/(shared|storage|scripts|frontend|admin)/
+
+Options -Indexes

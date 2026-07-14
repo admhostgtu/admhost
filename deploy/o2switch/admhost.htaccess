@@ -1,0 +1,10 @@
+# Interdire tout accès web au dossier admhost (O2Switch)
+# Placer ce fichier dans ~/admhost/.htaccess
+
+Require all denied
+
+<FilesMatch "\.(env|log|sql|sh)$">
+    Require all denied
+</FilesMatch>
+
+Options -Indexes

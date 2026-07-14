@@ -1,0 +1,8 @@
+# Protection racine projet — si le dossier est exposé par erreur
+Require all denied
+
+<FilesMatch "\.(env|log|sql|sh|md|gitignore|example|production)$">
+    Require all denied
+</FilesMatch>
+
+Options -Indexes

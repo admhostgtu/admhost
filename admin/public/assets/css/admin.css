@@ -1,0 +1,76 @@
+/**
+ * Styles CSS du panneau d'administration.
+ * Interface sombre avec sidebar fixe.
+ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body.admin-body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex;
+    min-height: 100vh;
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    width: 240px;
+    background: #1e293b;
+    padding: 1.5rem 0;
+    flex-shrink: 0;
+}
+.sidebar-brand { font-size: 1.3rem; font-weight: 700; padding: 0 1.5rem 1.5rem; color: #818cf8; }
+.sidebar-nav { display: flex; flex-direction: column; }
+.sidebar-link {
+    display: block; padding: 0.75rem 1.5rem; color: #94a3b8;
+    text-decoration: none; transition: background 0.2s;
+}
+.sidebar-link:hover { background: #334155; color: #fff; }
+.sidebar-link-danger { color: #f87171; }
+
+/* --- Content --- */
+.admin-content { flex: 1; display: flex; flex-direction: column; }
+.topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 2rem; background: #1e293b; border-bottom: 1px solid #334155;
+}
+.topbar-user { color: #94a3b8; font-size: 0.9rem; }
+.admin-main { padding: 2rem; flex: 1; }
+
+/* --- Stats --- */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+.stat-card { background: #1e293b; padding: 1.5rem; border-radius: 12px; }
+.stat-value { font-size: 2rem; font-weight: 700; color: #818cf8; margin-top: 0.5rem; }
+.stat-ok { color: #4ade80; }
+
+/* --- Table --- */
+.admin-table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 12px; overflow: hidden; }
+.admin-table th, .admin-table td { padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid #334155; }
+.admin-table th { background: #334155; font-weight: 600; }
+.admin-table a { color: #818cf8; }
+
+/* --- Forms --- */
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; margin-bottom: 0.3rem; color: #94a3b8; font-size: 0.9rem; }
+.form-group input { width: 100%; padding: 0.6rem; background: #334155; border: 1px solid #475569; border-radius: 8px; color: #e2e8f0; }
+.btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: 600; cursor: pointer; border: none; }
+.btn-primary { background: #6366f1; color: #fff; }
+.btn-outline { background: transparent; color: #818cf8; border: 1px solid #818cf8; }
+.btn-block { display: block; width: 100%; text-align: center; }
+.alert-error { background: #450a0a; color: #fca5a5; padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; }
+
+/* --- Login --- */
+.admin-login { display: flex; justify-content: center; align-items: center; min-height: 100vh; width: 100%; }
+.login-card { background: #1e293b; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 400px; }
+.login-card h1 { text-align: center; margin-bottom: 1.5rem; color: #818cf8; }
+
+.settings-form { max-width: 500px; }
+.settings-form select { width: 100%; padding: 0.6rem; background: #334155; border: 1px solid #475569; border-radius: 8px; color: #e2e8f0; }
+.user-detail { background: #1e293b; padding: 2rem; border-radius: 12px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; background: #334155; }
+.badge-active { background: #065f46; color: #6ee7b7; }
+.badge-cancelled { background: #450a0a; color: #fca5a5; }
+.badge-past_due { background: #78350f; color: #fcd34d; }
+.actions a { color: #818cf8; margin-right: 0.5rem; }
