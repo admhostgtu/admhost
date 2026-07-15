@@ -90,11 +90,14 @@ class UserController extends Controller
             }
         }
 
+        $plans = $this->api->get('/api/admin/plans');
+
         $this->view('users.assign', [
             'title'  => 'Attribuer un service',
             'admin'  => AdminAuth::user(),
             'user'   => $user,
             'userId' => $id,
+            'plans'  => $plans['data'] ?? [],
         ]);
     }
 }

@@ -131,6 +131,41 @@ try {
         ", 'Table stripe_webhook_events');
     }
 
+    // --- Colonnes SaaS v2 (docker, annual, subdomains) ---
+    $columnMigrationsV2 = [
+        ['service_plans', 'price_annual', 'DECIMAL(10,2) NOT NULL DEFAULT 0.00'],
+        ['service_plans', 'stripe_price_id_annual', 'VARCHAR(255) NULL'],
+        ['service_plans', 'config_schema', 'JSON NULL'],
+        ['services', 'subdomain', 'VARCHAR(100) NULL'],
+        ['services', 'docker_container_id', 'VARCHAR(128) NULL'],
+        ['services', 'docker_image', 'VARCHAR(255) NULL'],
+        ['services', 'web_url', 'VARCHAR(255) NULL'],
+        ['subscriptions', 'billing_interval', "ENUM('monthly','annual') NOT NULL DEFAULT 'monthly'"],
+    ];
+
+    foreach ($columnMigrationsV2 as [$table, $column, $definition]) {
+        if (tableExists($db, $table) && !columnExists($db, $table, $column)) {
+            execSql($db, "ALTER TABLE `$table` ADD COLUMN `$column` $definition", "Colonne $table.$column");
+        } else {
+            migrateLog("[--] Colonne $table.$column déjà présente");
+        }
+    }
+
+    // Étendre ENUM type pour docker (MariaDB)
+    if (tableExists($db, 'services')) {
+        execSql($db, "
+            ALTER TABLE services MODIFY COLUMN type
+            ENUM('hosting', 'email', 'vps', 'docker') NOT NULL DEFAULT 'hosting'
+        ", 'ENUM services.type + docker');
+        execSql($db, "
+            ALTER TABLE service_plans MODIFY COLUMN type
+            ENUM('hosting', 'email', 'vps', 'docker') NOT NULL DEFAULT 'hosting'
+        ", 'ENUM service_plans.type + docker');
+    }
+
+    // Mettre à jour prix annuels des plans existants
+    $db->exec("UPDATE service_plans SET price_annual = price_monthly * 10 WHERE price_annual = 0 OR price_annual IS NULL");
+
     // --- Seeds idempotents ---
     $db->exec("
         INSERT IGNORE INTO service_plans (slug, name, description, type, price_monthly, features) VALUES

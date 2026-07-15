@@ -27,6 +27,19 @@ class Subscription extends Model
         return $row ?: null;
     }
 
+    public function allByUser(int $userId): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT sub.*, sp.name AS plan_name
+            FROM {$this->table} sub
+            LEFT JOIN service_plans sp ON sp.id = sub.plan_id
+            WHERE sub.user_id = :uid
+            ORDER BY sub.created_at DESC
+        ");
+        $stmt->execute(['uid' => $userId]);
+        return $stmt->fetchAll();
+    }
+
     public function findByStripeId(string $stripeId): ?array
     {
         $stmt = $this->db->prepare("

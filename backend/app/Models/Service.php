@@ -79,30 +79,37 @@ class Service extends Model
             INSERT INTO {$this->table}
             (user_id, plan_id, name, type, status, ssh_host, ssh_port, ssh_username, ssh_password,
              smtp_host, smtp_port, smtp_username, smtp_password, smtp_encryption,
-             linux_username, home_directory, provisioned_at)
+             linux_username, home_directory, subdomain, docker_container_id, docker_image, web_url,
+             metadata, provisioned_at)
             VALUES
             (:user_id, :plan_id, :name, :type, :status, :ssh_host, :ssh_port, :ssh_username, :ssh_password,
              :smtp_host, :smtp_port, :smtp_username, :smtp_password, :smtp_encryption,
-             :linux_username, :home_directory, :provisioned_at)
+             :linux_username, :home_directory, :subdomain, :docker_container_id, :docker_image, :web_url,
+             :metadata, :provisioned_at)
         ");
         $stmt->execute([
-            'user_id'         => $data['user_id'],
-            'plan_id'         => $data['plan_id'] ?? null,
-            'name'            => $data['name'],
-            'type'            => $data['type'] ?? 'hosting',
-            'status'          => $data['status'] ?? 'pending',
-            'ssh_host'        => $data['ssh_host'] ?? null,
-            'ssh_port'        => $data['ssh_port'] ?? 22,
-            'ssh_username'    => $data['ssh_username'] ?? null,
-            'ssh_password'    => $data['ssh_password'] ?? null,
-            'smtp_host'       => $data['smtp_host'] ?? null,
-            'smtp_port'       => $data['smtp_port'] ?? 587,
-            'smtp_username'   => $data['smtp_username'] ?? null,
-            'smtp_password'   => $data['smtp_password'] ?? null,
-            'smtp_encryption' => $data['smtp_encryption'] ?? 'tls',
-            'linux_username'  => $data['linux_username'] ?? null,
-            'home_directory'  => $data['home_directory'] ?? null,
-            'provisioned_at'  => $data['provisioned_at'] ?? null,
+            'user_id'             => $data['user_id'],
+            'plan_id'             => $data['plan_id'] ?? null,
+            'name'                => $data['name'],
+            'type'                => $data['type'] ?? 'hosting',
+            'status'              => $data['status'] ?? 'pending',
+            'ssh_host'            => $data['ssh_host'] ?? null,
+            'ssh_port'            => $data['ssh_port'] ?? 22,
+            'ssh_username'        => $data['ssh_username'] ?? null,
+            'ssh_password'        => $data['ssh_password'] ?? null,
+            'smtp_host'           => $data['smtp_host'] ?? null,
+            'smtp_port'           => $data['smtp_port'] ?? 587,
+            'smtp_username'       => $data['smtp_username'] ?? null,
+            'smtp_password'       => $data['smtp_password'] ?? null,
+            'smtp_encryption'     => $data['smtp_encryption'] ?? 'tls',
+            'linux_username'      => $data['linux_username'] ?? null,
+            'home_directory'      => $data['home_directory'] ?? null,
+            'subdomain'           => $data['subdomain'] ?? null,
+            'docker_container_id' => $data['docker_container_id'] ?? null,
+            'docker_image'        => $data['docker_image'] ?? null,
+            'web_url'             => $data['web_url'] ?? null,
+            'metadata'            => isset($data['metadata']) ? (is_string($data['metadata']) ? $data['metadata'] : json_encode($data['metadata'])) : null,
+            'provisioned_at'      => $data['provisioned_at'] ?? null,
         ]);
 
         return $this->findDecrypted((int) $this->db->lastInsertId()) ?? [];
@@ -116,6 +123,7 @@ class Service extends Model
             'name', 'status', 'ssh_host', 'ssh_port', 'ssh_username', 'ssh_password',
             'smtp_host', 'smtp_port', 'smtp_username', 'smtp_password', 'smtp_encryption',
             'linux_username', 'home_directory', 'provisioned_at', 'plan_id',
+            'subdomain', 'docker_container_id', 'docker_image', 'web_url', 'metadata',
         ];
         $fields = [];
         $params = ['id' => $id];

@@ -25,11 +25,34 @@ class ProvisioningService
         $this->runAsUser  = env('PROVISION_USER', 'provisioner');
 
         $this->allowedScripts = [
-            'create_linux_user' => 'create_linux_user.sh',
-            'create_ssh_access' => 'create_ssh_access.sh',
-            'create_mailbox'    => 'create_mailbox.sh',
-            'provision_full'    => 'provision_full.sh',
+            'create_linux_user'    => 'create_linux_user.sh',
+            'create_ssh_access'    => 'create_ssh_access.sh',
+            'create_mailbox'       => 'create_mailbox.sh',
+            'provision_full'       => 'provision_full.sh',
+            'create_docker_service'=> 'create_docker_service.sh',
         ];
+    }
+
+    /**
+     * Provisionne selon le type de service (hosting, email, vps, docker).
+     */
+    public function provisionByType(int $userId, int $serviceId, string $email, string $type): array
+    {
+        $this->validateEmail($email);
+        $username  = $this->generateUsername($email);
+        $subdomain = substr(preg_replace('/[^a-z0-9]/', '', strtolower(explode('@', $email)[0])), 0, 20) . $userId;
+
+        return match ($type) {
+            'email' => $this->createMailbox($email, $username),
+            'docker' => $this->runScript('create_docker_service', [
+                'user_id'    => (string) $userId,
+                'service_id' => (string) $serviceId,
+                'username'   => $username,
+                'subdomain'  => $subdomain,
+            ]),
+            'vps' => $this->createSshAccess($username),
+            default => $this->provisionFull($userId, $serviceId, $email),
+        };
     }
 
     public function provisionFull(int $userId, int $serviceId, string $email): array
@@ -276,6 +299,7 @@ class ProvisioningService
             match ($key) {
                 'username' => $this->validateUsername($value),
                 'email'    => $this->validateEmail($value),
+                'subdomain'=> $this->validateSubdomain($value),
                 'user_id', 'service_id' => $this->validateNumericId($value),
                 default    => null,
             };
@@ -288,7 +312,7 @@ class ProvisioningService
 
     private function mapCredentials(array $data): array
     {
-        return [
+        $creds = [
             'linux_username'  => $data['linux_username'] ?? null,
             'home_directory'  => $data['home_directory'] ?? null,
             'ssh_host'        => $data['ssh_host'] ?? env('SSH_HOST', 'localhost'),
@@ -300,7 +324,19 @@ class ProvisioningService
             'smtp_username'   => $data['smtp_username'] ?? $data['email'] ?? null,
             'smtp_password'   => $data['smtp_password'] ?? null,
             'smtp_encryption' => $data['smtp_encryption'] ?? 'tls',
+            'subdomain'       => $data['subdomain'] ?? null,
+            'web_url'         => $data['web_url'] ?? null,
+            'docker_container_id' => $data['docker_container_id'] ?? null,
+            'docker_image'    => $data['docker_image'] ?? null,
         ];
+
+        if (!empty($data['metadata'])) {
+            $creds['metadata'] = is_string($data['metadata'])
+                ? $data['metadata']
+                : json_encode($data['metadata'], JSON_UNESCAPED_UNICODE);
+        }
+
+        return $creds;
     }
 
     private function generateUsername(string $email): string
@@ -320,6 +356,13 @@ class ProvisioningService
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Email invalide');
+        }
+    }
+
+    private function validateSubdomain(string $subdomain): void
+    {
+        if (!preg_match('/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/', $subdomain)) {
+            throw new \InvalidArgumentException('Sous-domaine invalide');
         }
     }
 

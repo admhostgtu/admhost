@@ -40,4 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    const consoleToggle = document.getElementById('console-nav-toggle');
+    const consoleSidebar = document.getElementById('console-sidebar');
+    if (consoleToggle && consoleSidebar) {
+        consoleToggle.addEventListener('click', () => {
+            consoleSidebar.classList.toggle('is-open');
+        });
+    }
 });

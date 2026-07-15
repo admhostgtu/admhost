@@ -18,13 +18,23 @@ class ApiClient
         $this->client = new HttpApiClient();
     }
 
+    private function token(): ?string
+    {
+        return $_SESSION['token'] ?? null;
+    }
+
     public function get(string $endpoint): array
     {
-        return $this->client->get($endpoint, $_SESSION['token'] ?? null);
+        return $this->client->get($endpoint, $this->token());
     }
 
     public function post(string $endpoint, array $data = []): array
     {
-        return $this->client->post($endpoint, $data, $_SESSION['token'] ?? null);
+        return $this->client->post($endpoint, $data, $this->token());
+    }
+
+    public function put(string $endpoint, array $data = []): array
+    {
+        return $this->client->put($endpoint, $data, $this->token());
     }
 }

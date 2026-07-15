@@ -28,7 +28,7 @@ class StripeService
         $this->logFile       = dirname(__DIR__, 3) . '/storage/logs/stripe_webhook.log';
     }
 
-    public function createCheckoutSession(int $userId, string $priceId, string $planSlug): array
+    public function createCheckoutSession(int $userId, string $priceId, string $planSlug, string $interval = 'monthly'): array
     {
         $userModel = new User();
         $user = $userModel->findPublic($userId);
@@ -49,8 +49,8 @@ class StripeService
             $userModel->update($userId, ['stripe_customer_id' => $customerId]);
         }
 
-        $successUrl = env('APP_URL', 'http://localhost') . '/dashboard?checkout=success';
-        $cancelUrl  = env('APP_URL', 'http://localhost') . '/pricing?checkout=cancelled';
+        $successUrl = rtrim(env('CONSOLE_URL', env('APP_URL', 'http://localhost')), '/') . '/dashboard?checkout=success';
+        $cancelUrl  = rtrim(env('VITRINE_URL', env('APP_URL', 'http://localhost')), '/') . '/pricing?checkout=cancelled';
 
         $session = $this->api('POST', '/v1/checkout/sessions', [
             'customer'             => $customerId,
@@ -61,14 +61,38 @@ class StripeService
             'cancel_url'           => $cancelUrl,
             'metadata[user_id]'    => $userId,
             'metadata[plan_slug]'  => $planSlug,
+            'metadata[interval]'   => $interval,
             'subscription_data[metadata][user_id]'   => $userId,
             'subscription_data[metadata][plan_slug]' => $planSlug,
+            'subscription_data[metadata][interval]'  => $interval,
         ]);
 
         return [
             'checkout_url' => $session['url'],
             'session_id'   => $session['id'],
         ];
+    }
+
+    /**
+     * Portail client Stripe — gestion abonnement et moyens de paiement.
+     */
+    public function createBillingPortalSession(int $userId): string
+    {
+        $userModel = new User();
+        $user = $userModel->findPublic($userId);
+
+        if (!$user || empty($user['stripe_customer_id'])) {
+            throw new ApiException('Aucun compte de facturation Stripe associé.', 422);
+        }
+
+        $returnUrl = rtrim(env('CONSOLE_URL', env('APP_URL', 'http://localhost')), '/') . '/billing';
+
+        $session = $this->api('POST', '/v1/billing_portal/sessions', [
+            'customer'   => $user['stripe_customer_id'],
+            'return_url' => $returnUrl,
+        ]);
+
+        return $session['url'] ?? '';
     }
 
     /**

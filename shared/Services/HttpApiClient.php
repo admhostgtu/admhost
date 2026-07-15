@@ -37,6 +37,11 @@ class HttpApiClient
         return $this->request('POST', $endpoint, $data, $bearerToken);
     }
 
+    public function put(string $endpoint, array $data = [], ?string $bearerToken = null): array
+    {
+        return $this->request('PUT', $endpoint, $data, $bearerToken);
+    }
+
     public function delete(string $endpoint, ?string $bearerToken = null): array
     {
         return $this->request('DELETE', $endpoint, [], $bearerToken);

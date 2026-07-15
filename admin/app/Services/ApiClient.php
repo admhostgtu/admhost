@@ -28,6 +28,11 @@ class ApiClient
         return $this->client->post($endpoint, $data, $_SESSION['admin_token'] ?? null);
     }
 
+    public function put(string $endpoint, array $data = []): array
+    {
+        return $this->client->put($endpoint, $data, $_SESSION['admin_token'] ?? null);
+    }
+
     public function delete(string $endpoint): array
     {
         return $this->client->delete($endpoint, $_SESSION['admin_token'] ?? null);

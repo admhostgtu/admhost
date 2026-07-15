@@ -9,6 +9,7 @@ namespace Frontend\Controllers;
 
 use Shared\Core\Controller;
 use Shared\Core\Request;
+use Shared\Services\HttpApiClient;
 
 class HomeController extends Controller
 {
@@ -39,15 +40,30 @@ class HomeController extends Controller
      */
     public function pricing(Request $request): never
     {
-        $plans = [
-            ['name' => 'Starter',  'price' => 9,  'features' => ['1 site', '10 Go stockage', 'Support email']],
-            ['name' => 'Pro',      'price' => 29, 'features' => ['5 sites', '50 Go stockage', 'Support prioritaire']],
-            ['name' => 'Business', 'price' => 79, 'features' => ['Illimité', '200 Go stockage', 'Support 24/7']],
-        ];
+        $api   = new HttpApiClient();
+        $resp  = $api->get('/api/stripe/plans');
+        $plans = $resp['data'] ?? [];
 
-        $this->view('home.pricing', [
+        if ($plans === []) {
+            $plans = [
+                ['slug' => 'starter', 'name' => 'Starter', 'price_monthly' => 9, 'price_annual' => 90, 'features' => '["1 site","10 Go","SSH"]'],
+                ['slug' => 'pro', 'name' => 'Pro', 'price_monthly' => 29, 'price_annual' => 290, 'features' => '["5 sites","50 Go","SSH + SMTP"]'],
+                ['slug' => 'business', 'name' => 'Business', 'price_monthly' => 79, 'price_annual' => 790, 'features' => '["Illimité","200 Go","Docker"]'],
+            ];
+        }
+
+        $layout = app_site() === 'console' ? 'console' : null;
+        $data = [
             'title' => 'Tarifs',
             'plans' => $plans,
-        ]);
+            'user'  => $_SESSION['user'] ?? null,
+            'error' => $request->query('error'),
+        ];
+
+        if ($layout === 'console' && !empty($_SESSION['user'])) {
+            $this->view('home.pricing', $data, 'console');
+        }
+
+        $this->view('home.pricing', $data);
     }
 }

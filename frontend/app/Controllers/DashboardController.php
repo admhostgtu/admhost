@@ -35,6 +35,6 @@ class DashboardController extends Controller
             'user'         => $profile['data'] ?? $_SESSION['user'],
             'services'     => $services['data'] ?? [],
             'subscription' => $subscription['data'] ?? null,
-        ]);
+        ], 'console');
     }
 }

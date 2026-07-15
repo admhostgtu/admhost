@@ -66,4 +66,34 @@ class ServiceController extends Controller
 
         $this->json(['data' => $sub]);
     }
+
+    /**
+     * PUT /api/services/{id}/config — mise à jour config client (metadata JSON).
+     */
+    public function updateConfig(Request $request, string $id): never
+    {
+        $service = $this->services->findDecrypted((int) $id);
+
+        if (!$service) {
+            $this->json(['error' => 'Service introuvable'], 404);
+        }
+
+        if (!Auth::isAdmin() && (int) $service['user_id'] !== Auth::id()) {
+            $this->json(['error' => 'Accès refusé'], 403);
+        }
+
+        $metadata = $request->input('metadata');
+        if (!is_array($metadata)) {
+            $this->json(['error' => 'metadata invalide'], 422);
+        }
+
+        $this->services->update((int) $id, [
+            'metadata' => json_encode($metadata, JSON_UNESCAPED_UNICODE),
+        ]);
+
+        $this->json([
+            'message' => 'Configuration mise à jour',
+            'data'    => $this->services->findDecrypted((int) $id),
+        ]);
+    }
 }

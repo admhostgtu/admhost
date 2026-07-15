@@ -28,16 +28,46 @@ class StripeController extends Controller
      */
     public function checkout(Request $request): never
     {
-        $priceId  = $request->input('price_id');
         $planSlug = $request->input('plan_slug', 'starter');
+        $interval = $request->input('interval', 'monthly'); // monthly | annual
+        $priceId  = $request->input('price_id');
 
         if (!$priceId) {
-            $this->json(['error' => 'price_id requis'], 422);
+            $planModel = new \Backend\Models\Plan();
+            $plan = $planModel->findBySlug($planSlug);
+            if (!$plan) {
+                $this->json(['error' => 'Plan introuvable'], 404);
+            }
+            $priceId = ($interval === 'annual')
+                ? ($plan['stripe_price_id_annual'] ?? null)
+                : ($plan['stripe_price_id'] ?? null);
+
+            if (!$priceId) {
+                $this->json(['error' => 'Ce plan n\'est pas encore configuré dans Stripe. Contactez l\'administrateur.'], 422);
+            }
         }
 
         try {
-            $session = $this->stripe->createCheckoutSession(Auth::id(), $priceId, $planSlug);
+            $session = $this->stripe->createCheckoutSession(
+                Auth::id(),
+                $priceId,
+                $planSlug,
+                $interval
+            );
             $this->json(['data' => $session]);
+        } catch (ApiException $e) {
+            $e->render();
+        }
+    }
+
+    /**
+     * POST /api/stripe/portal — portail client Stripe (factures, CB, annulation).
+     */
+    public function portal(Request $request): never
+    {
+        try {
+            $url = $this->stripe->createBillingPortalSession(Auth::id());
+            $this->json(['data' => ['portal_url' => $url]]);
         } catch (ApiException $e) {
             $e->render();
         }

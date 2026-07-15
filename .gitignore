@@ -29,3 +29,4 @@ Thumbs.db
 deploy/automated/_remote_deploy.sh
 deploy/automated/_vps_deploy_now.sh
 deploy/automated/_create_users.sh
+deploy/automated/_patch_vps.sh

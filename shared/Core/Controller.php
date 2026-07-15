@@ -18,11 +18,19 @@ abstract class Controller
     }
 
     /**
-     * Rend une vue PHP avec des données.
+     * Rend une vue PHP avec les données.
+     * @param string|null $layout 'console' pour l'espace client authentifié
      */
-    protected function view(string $template, array $data = []): never
+    protected function view(string $template, array $data = [], ?string $layout = null): never
     {
-        $content = View::render($template, $data);
+        if ($layout === 'console') {
+            $data['user']    = $data['user'] ?? ($_SESSION['user'] ?? null);
+            $data['content'] = View::render($template, $data);
+            $content         = View::render('layouts.console', $data);
+        } else {
+            $content = View::render($template, $data);
+        }
+
         Response::html($content)->send();
     }
 

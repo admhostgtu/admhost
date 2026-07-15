@@ -10,6 +10,8 @@ use Admin\Controllers\DashboardController;
 use Admin\Controllers\UserController;
 use Admin\Controllers\SubscriptionController;
 use Admin\Controllers\SettingsController;
+use Admin\Controllers\PlanController;
+use Admin\Controllers\ServiceAdminController;
 
 return [
     ['GET',  '/login',              [AuthController::class,         'showLogin']],
@@ -24,6 +26,14 @@ return [
     ['POST', '/users/create',       [UserController::class,         'create']],
     ['GET',  '/users/{id}/assign',  [UserController::class,         'assignService']],
     ['POST', '/users/{id}/assign',  [UserController::class,         'assignService']],
+
+    ['GET',  '/services',           [ServiceAdminController::class, 'index']],
+
+    ['GET',  '/plans',              [PlanController::class,         'index']],
+    ['GET',  '/plans/create',       [PlanController::class,         'create']],
+    ['POST', '/plans/create',       [PlanController::class,         'create']],
+    ['GET',  '/plans/{id}/edit',    [PlanController::class,         'edit']],
+    ['POST', '/plans/{id}/edit',    [PlanController::class,         'edit']],
 
     ['GET',  '/subscriptions',      [SubscriptionController::class, 'index']],
 
