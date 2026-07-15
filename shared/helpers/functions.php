@@ -80,10 +80,65 @@ function redirect(string $url, int $status = 302): never
 }
 
 /**
- * Retourne l'URL de base de l'application.
+ * Retourne l'URL de base de l'application courante.
  */
 function base_url(string $path = ''): string
 {
     $base = rtrim(env('APP_URL', 'http://localhost'), '/');
     return $base . '/' . ltrim($path, '/');
+}
+
+/** Site vitrine — admhost.fr */
+function vitrine_url(string $path = '/'): string
+{
+    $base = rtrim((string) env('VITRINE_URL', 'https://admhost.fr'), '/');
+    return $base . '/' . ltrim($path, '/');
+}
+
+/** Espace client — console.admhost.fr */
+function console_url(string $path = '/'): string
+{
+    $base = rtrim((string) env('CONSOLE_URL', env('APP_URL', 'https://console.admhost.fr')), '/');
+    return $base . '/' . ltrim($path, '/');
+}
+
+/** Panel admin — manage.console.admhost.fr */
+function admin_site_url(string $path = '/'): string
+{
+    $base = rtrim((string) env('ADMIN_URL', 'https://manage.console.admhost.fr'), '/');
+    $prefix = rtrim((string) env('ADMIN_ROUTE_PREFIX', ''), '/');
+    $path = ltrim($path, '/');
+    if ($prefix !== '') {
+        return $base . $prefix . ($path !== '' ? '/' . $path : '');
+    }
+    return $base . ($path !== '' ? '/' . $path : '');
+}
+
+/** Chemin relatif admin (compatible /admin en local et racine en sous-domaine). */
+function admin_path(string $path = ''): string
+{
+    $prefix = rtrim((string) env('ADMIN_ROUTE_PREFIX', '/admin'), '/');
+    $path = ltrim($path, '/');
+    if ($path === '') {
+        return $prefix !== '' ? $prefix : '/';
+    }
+    return ($prefix !== '' ? $prefix . '/' : '/') . $path;
+}
+
+/** Site courant : vitrine | console | admin */
+function app_site(): string
+{
+    return defined('APP_SITE') ? APP_SITE : 'console';
+}
+
+/** Token CSRF courant. */
+function csrf_token(): string
+{
+    return \Shared\Core\Csrf::token();
+}
+
+/** Champ hidden CSRF pour formulaires. */
+function csrf_field(): string
+{
+    return \Shared\Core\Csrf::field();
 }

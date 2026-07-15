@@ -6,7 +6,8 @@ ob_start();
 ?>
 
 <div class="admin-login">
-    <form method="POST" action="/admin/login" class="login-card">
+    <form method="POST" action="<?= e(admin_path('login')) ?>" class="login-card">
+        <?= csrf_field() ?>
         <h1>Administration</h1>
 
         <?php if (!empty($error)): ?>

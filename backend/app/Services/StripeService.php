@@ -87,9 +87,11 @@ class StripeService
 
         $this->webhookLog('RECEIVED', "event_id=$eventId type=$eventType");
 
-        // Idempotence — refuser le retraitement
         $webhookModel = new WebhookEventModel();
-        if ($eventId && $webhookModel->alreadyProcessed($eventId)) {
+        $payloadHash = hash('sha256', $payload);
+
+        // Idempotence atomique — réserver l'événement avant traitement
+        if ($eventId && !$webhookModel->tryClaim($eventId, $eventType, $payloadHash)) {
             $this->webhookLog('SKIPPED', "event_id=$eventId déjà traité");
             return ['handled' => true, 'action' => 'already_processed', 'event_id' => $eventId];
         }
@@ -104,17 +106,12 @@ class StripeService
                 default                           => ['handled' => false, 'type' => $eventType],
             };
 
-            if ($eventId) {
-                $webhookModel->markProcessed($eventId, $eventType, hash('sha256', $payload));
-            }
-
             SecurityLogger::log('stripe_webhook_processed', [
                 'event_id' => $eventId,
                 'type'     => $eventType,
-                'result'   => $result,
             ]);
 
-            $this->webhookLog('PROCESSED', "event_id=$eventId result=" . json_encode($result));
+            $this->webhookLog('PROCESSED', "event_id=$eventId");
 
             return $result;
 

@@ -2,7 +2,7 @@
 
 <div class="page-header">
     <h1>Utilisateurs</h1>
-    <a href="/admin/users/create" class="btn btn-primary">+ Créer</a>
+    <a href="<?= e(admin_path('users/create')) ?>" class="btn btn-primary">+ Créer</a>
 </div>
 
 <table class="admin-table">
@@ -28,7 +28,7 @@
                     <td><span class="badge"><?= e($user['role'] ?? 'user') ?></span></td>
                     <td><span class="badge badge-<?= e($user['status'] ?? 'active') ?>"><?= e($user['status'] ?? '') ?></span></td>
                     <td class="actions">
-                        <a href="/admin/users/<?= e((string) $user['id']) ?>/assign">+ Service</a>
+                        <a href="<?= e(admin_path('users/' . (string) $user['id'] . '/assign')) ?>">+ Service</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

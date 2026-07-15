@@ -78,11 +78,19 @@ class AdminController extends Controller
 
             if ($result['success']) {
                 $serviceModel->activate((int) $service['id'], $result['credentials']);
-                $service = $serviceModel->find((int) $service['id']);
             }
         }
 
-        $this->json(['message' => 'Service attribué', 'data' => $service], 201);
+        $public = $serviceModel->find((int) $service['id']);
+        if ($public) {
+            foreach (['ssh_password', 'smtp_password'] as $secret) {
+                if (!empty($public[$secret])) {
+                    $public[$secret] = '********';
+                }
+            }
+        }
+
+        $this->json(['message' => 'Service attribué', 'data' => $public], 201);
     }
 
     /**

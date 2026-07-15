@@ -14,7 +14,26 @@ class WebhookEventModel extends Model
     protected string $table = 'stripe_webhook_events';
 
     /**
-     * Vérifie si l'événement a déjà été traité (idempotence).
+     * Réserve atomiquement un événement webhook (idempotence).
+     * Retourne false si déjà traité.
+     */
+    public function tryClaim(string $eventId, string $eventType, string $payloadHash): bool
+    {
+        $stmt = $this->db->prepare("
+            INSERT IGNORE INTO {$this->table} (event_id, event_type, payload_hash)
+            VALUES (:eid, :type, :hash)
+        ");
+        $stmt->execute([
+            'eid'  => $eventId,
+            'type' => $eventType,
+            'hash' => $payloadHash,
+        ]);
+
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * @deprecated Utiliser tryClaim() pour éviter les races
      */
     public function alreadyProcessed(string $eventId): bool
     {

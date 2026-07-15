@@ -9,6 +9,7 @@ namespace Frontend\Controllers;
 
 use Frontend\Services\ApiClient;
 use Shared\Core\Controller;
+use Shared\Core\Csrf;
 use Shared\Core\Request;
 
 class AuthController extends Controller
@@ -27,6 +28,8 @@ class AuthController extends Controller
 
     public function login(Request $request): never
     {
+        $this->validateCsrf($request);
+
         $response = $this->api->post('/api/login', [
             'email'    => $request->input('email'),
             'password' => $request->input('password'),
@@ -52,6 +55,8 @@ class AuthController extends Controller
 
     public function register(Request $request): never
     {
+        $this->validateCsrf($request);
+
         $response = $this->api->post('/api/register', [
             'name'     => $request->input('name'),
             'email'    => $request->input('email'),

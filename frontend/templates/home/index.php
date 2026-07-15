@@ -10,8 +10,8 @@ ob_start();
     <h1>Bienvenue sur <?= e($appName) ?></h1>
     <p class="hero-subtitle">La solution d'hébergement simple et performante pour votre SaaS.</p>
     <div class="hero-actions">
-        <a href="/register" class="btn btn-primary btn-lg">Commencer gratuitement</a>
-        <a href="/pricing" class="btn btn-outline btn-lg">Voir les tarifs</a>
+        <a href="<?= e(console_url('/register')) ?>" class="btn btn-primary btn-lg">Commencer gratuitement</a>
+        <a href="<?= e(vitrine_url('/pricing')) ?>" class="btn btn-outline btn-lg">Voir les tarifs</a>
     </div>
 </section>
 

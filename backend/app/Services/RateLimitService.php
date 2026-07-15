@@ -125,4 +125,32 @@ class RateLimitService
             'success' => $success ? 1 : 0,
         ]);
     }
+
+    /**
+     * Rate limit générique par IP + action (ex: register).
+     */
+    public function assertIpActionLimit(string $ip, string $action, int $maxAttempts, int $windowSeconds): void
+    {
+        $db = Database::getInstance();
+        $marker = '__' . $action . '__';
+
+        $stmt = $db->prepare("
+            SELECT COUNT(*) FROM login_attempts
+            WHERE email = :marker AND ip_address = :ip
+              AND created_at > DATE_SUB(NOW(), INTERVAL :window SECOND)
+        ");
+        $stmt->execute([
+            'marker' => $marker,
+            'ip'     => $ip,
+            'window' => $windowSeconds,
+        ]);
+
+        if ((int) $stmt->fetchColumn() >= $maxAttempts) {
+            throw new ApiException('Trop de requêtes. Réessayez plus tard.', 429);
+        }
+
+        $db->prepare("
+            INSERT INTO login_attempts (email, ip_address, success) VALUES (:email, :ip, 0)
+        ")->execute(['email' => $marker, 'ip' => $ip]);
+    }
 }

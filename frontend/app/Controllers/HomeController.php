@@ -24,6 +24,17 @@ class HomeController extends Controller
     }
 
     /**
+     * Accueil console — redirige vers dashboard ou login.
+     */
+    public function consoleHome(Request $request): never
+    {
+        if (!empty($_SESSION['user'])) {
+            redirect('/dashboard');
+        }
+        redirect('/login');
+    }
+
+    /**
      * Page des tarifs / plans d'abonnement.
      */
     public function pricing(Request $request): never

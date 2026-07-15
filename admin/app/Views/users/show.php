@@ -11,7 +11,7 @@ ob_start();
         <p><strong>Email :</strong> <?= e($user['email'] ?? '') ?></p>
         <p><strong>ID :</strong> <?= e((string) $user['id']) ?></p>
         <p><strong>Créé le :</strong> <?= e($user['created_at'] ?? '') ?></p>
-        <a href="/admin/users" class="btn btn-outline">← Retour</a>
+        <a href="<?= e(admin_path('users')) ?>" class="btn btn-outline">← Retour</a>
     </div>
 <?php else: ?>
     <p>Utilisateur introuvable.</p>

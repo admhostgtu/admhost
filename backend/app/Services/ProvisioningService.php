@@ -179,7 +179,7 @@ class ProvisioningService
 
         $exitCode = proc_close($process);
 
-        $this->log('RESULT', "script=$scriptKey exit=$exitCode stdout=" . trim($stdout) . " stderr=" . trim($stderr));
+        $this->log('RESULT', "script=$scriptKey exit=$exitCode stdout=" . $this->redactForLog($stdout) . " stderr=" . trim($stderr));
 
         $result = json_decode(trim($stdout), true);
 
@@ -210,6 +210,12 @@ class ProvisioningService
             return $command;
         }
 
+        if (env('APP_ENV', 'production') === 'production'
+            && !$this->commandExists('runuser')
+            && !$this->commandExists('sudo')) {
+            throw new \RuntimeException('Provisioning indisponible : runuser/sudo requis en production.');
+        }
+
         // runuser (util-linux) ou sudo -u
         if ($this->commandExists('runuser')) {
             return 'runuser -u ' . escapeshellarg($this->runAsUser) . ' -- ' . $command;
@@ -219,8 +225,41 @@ class ProvisioningService
             return 'sudo -u ' . escapeshellarg($this->runAsUser) . ' -n ' . $command;
         }
 
-        $this->log('WARN', 'runuser/sudo indisponible — exécution directe');
+        if (env('APP_ENV', 'production') === 'production') {
+            throw new \RuntimeException('Provisioning refusé en production sans runuser/sudo.');
+        }
+
+        $this->log('WARN', 'runuser/sudo indisponible — exécution directe (dev only)');
         return $command;
+    }
+
+    /** Masque mots de passe et secrets dans les logs. */
+    private function redactForLog(string $output): string
+    {
+        $trimmed = trim($output);
+        $data = json_decode($trimmed, true);
+
+        if (is_array($data)) {
+            $this->redactArray($data);
+            return json_encode($data, JSON_UNESCAPED_UNICODE) ?: '[invalid json]';
+        }
+
+        return preg_replace(
+            '/"(ssh_password|smtp_password|linux_password|password)"\s*:\s*"[^"]*"/i',
+            '"$1":"[REDACTED]"',
+            $trimmed
+        ) ?? $trimmed;
+    }
+
+    private function redactArray(array &$data): void
+    {
+        foreach ($data as $key => &$value) {
+            if (is_array($value)) {
+                $this->redactArray($value);
+            } elseif (is_string($key) && preg_match('/password|secret|token/i', $key)) {
+                $value = '[REDACTED]';
+            }
+        }
     }
 
     private function validateParams(array $params): array

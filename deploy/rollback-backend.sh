@@ -14,7 +14,7 @@ require_root
 
 APP_DIR="${APP_DIR:-/var/www/admhost}"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/admhost}"
-API_DOMAIN="${API_DOMAIN:-api.tondomaine.com}"
+API_DOMAIN="${API_DOMAIN:-api.admhost.fr}"
 
 LATEST=$(ls -t "$BACKUP_DIR"/admhost_*.tar.gz 2>/dev/null | head -1)
 [ -n "$LATEST" ] || fail "Aucune sauvegarde dans $BACKUP_DIR"

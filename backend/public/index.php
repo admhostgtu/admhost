@@ -16,15 +16,16 @@ use Shared\Core\SecurityHeaders;
 ErrorHandler::register();
 SecurityHeaders::send(isApi: true);
 
-// CORS — origine frontend uniquement en production
-$corsOrigins = array_filter(array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', env('APP_URL', '')))));
+// CORS — origines explicites uniquement (jamais * en production)
+$corsOrigins = array_filter(array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', ''))));
 $origin      = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 if ($origin && in_array($origin, $corsOrigins, true)) {
     header('Access-Control-Allow-Origin: ' . $origin);
     header('Access-Control-Allow-Credentials: true');
-} elseif (env('APP_ENV', 'production') !== 'production') {
-    header('Access-Control-Allow-Origin: *');
+} elseif (env('APP_ENV', 'production') === 'local' && $origin) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Access-Control-Allow-Credentials: true');
 }
 
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');

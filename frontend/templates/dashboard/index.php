@@ -29,7 +29,7 @@
     <?php else: ?>
         <div class="empty-state">
             <p>Aucun abonnement actif.</p>
-            <a href="/pricing" class="btn btn-primary">Voir les offres</a>
+            <a href="<?= e(vitrine_url('/pricing')) ?>" class="btn btn-primary">Voir les offres</a>
         </div>
     <?php endif; ?>
 </section>

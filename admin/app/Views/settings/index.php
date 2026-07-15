@@ -5,7 +5,8 @@
 ob_start();
 ?>
 
-<form method="POST" action="/admin/settings" class="settings-form">
+<form method="POST" action="<?= e(admin_path('settings')) ?>" class="settings-form">
+    <?= csrf_field() ?>
     <div class="form-group">
         <label for="app_name">Nom de l'application</label>
         <input type="text" id="app_name" name="app_name" value="<?= e($settings['app_name'] ?? '') ?>">

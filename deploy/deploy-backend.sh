@@ -18,12 +18,21 @@ source "$SCRIPT_DIR/lib/common.sh"
 enable_deploy_debug
 require_root
 
+# Charger domaines AdmHost
+# shellcheck source=domains.env
+[ -f "$SCRIPT_DIR/domains.env" ] && source "$SCRIPT_DIR/domains.env"
+
 # --- Configuration ---
-GIT_REPO="${GIT_REPO:-https://github.com/VOTRE_USER/admhost.git}"
+GIT_REPO="${GIT_REPO:-https://github.com/admhostgtu/admhost.git}"
 GIT_BRANCH="${GIT_BRANCH:-main}"
 APP_DIR="${APP_DIR:-/var/www/admhost}"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/admhost}"
-API_DOMAIN="${API_DOMAIN:-api.tondomaine.com}"
+API_DOMAIN="${API_DOMAIN:-api.admhost.fr}"
+API_URL="${API_URL:-https://api.admhost.fr}"
+VITRINE_URL="${VITRINE_URL:-https://admhost.fr}"
+CONSOLE_URL="${CONSOLE_URL:-https://console.admhost.fr}"
+ADMIN_URL="${ADMIN_URL:-https://manage.console.admhost.fr}"
+CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS:-$VITRINE_URL,$CONSOLE_URL,$ADMIN_URL}"
 DB_NAME="${DB_NAME:-admhost}"
 DB_USER="${DB_USER:-admhost_user}"
 DB_PASSWORD="${DB_PASSWORD:-CHANGE_ME}"
@@ -98,8 +107,19 @@ sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${DB_PASSWORD}|" "$APP_DIR/.env"
 sed -i "s|^DB_PASS=.*|DB_PASS=${DB_PASSWORD}|" "$APP_DIR/.env" 2>/dev/null || true
 sed -i "s|^APP_ENV=.*|APP_ENV=production|" "$APP_DIR/.env"
 sed -i "s|^APP_DEBUG=.*|APP_DEBUG=false|" "$APP_DIR/.env"
+sed -i "s|^API_URL=.*|API_URL=${API_URL}|" "$APP_DIR/.env"
+sed -i "s|^VITRINE_URL=.*|VITRINE_URL=${VITRINE_URL}|" "$APP_DIR/.env" 2>/dev/null || \
+    echo "VITRINE_URL=${VITRINE_URL}" >> "$APP_DIR/.env"
+sed -i "s|^CONSOLE_URL=.*|CONSOLE_URL=${CONSOLE_URL}|" "$APP_DIR/.env" 2>/dev/null || \
+    echo "CONSOLE_URL=${CONSOLE_URL}" >> "$APP_DIR/.env"
+sed -i "s|^ADMIN_URL=.*|ADMIN_URL=${ADMIN_URL}|" "$APP_DIR/.env" 2>/dev/null || \
+    echo "ADMIN_URL=${ADMIN_URL}" >> "$APP_DIR/.env"
+sed -i "s|^APP_URL=.*|APP_URL=${CONSOLE_URL}|" "$APP_DIR/.env"
+sed -i "s|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}|" "$APP_DIR/.env"
+sed -i "s|^ADMIN_EMAIL=.*|ADMIN_EMAIL=admin@admhost.fr|" "$APP_DIR/.env"
 
 secure_env_file "$APP_DIR/.env"
+validate_production_secrets "$APP_DIR/.env"
 
 # =============================================================================
 # 6. Permissions + migrations
@@ -108,8 +128,6 @@ log "Étape 6/8 — Permissions et migrations..."
 mkdir -p "$APP_DIR/storage/logs" "$APP_DIR/storage/cache" "$APP_DIR/storage/backups"
 chmod -R 775 "$APP_DIR/storage"
 chown -R www-data:www-data "$APP_DIR/storage"
-chmod +x "$APP_DIR/scripts/provision/"*.sh 2>/dev/null || true
-
 chmod +x "$APP_DIR/scripts/provision/"*.sh 2>/dev/null || true
 secure_env_file "$APP_DIR/.env"
 
@@ -125,7 +143,7 @@ PHP_FPM_SOCKET=$(detect_php_fpm_socket)
 NGINX_CONF="/etc/nginx/sites-available/admhost-api"
 
 cp "$APP_DIR/deploy/nginx/api.scaleway.conf" "$NGINX_CONF"
-sed -i "s/api.tondomaine.com/${API_DOMAIN}/g" "$NGINX_CONF"
+sed -i "s/api.admhost.fr/${API_DOMAIN}/g" "$NGINX_CONF"
 sed -i "s|__PHP_FPM_SOCKET__|${PHP_FPM_SOCKET}|g" "$NGINX_CONF"
 
 ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/admhost-api
@@ -174,5 +192,5 @@ echo ""
 log "Prochaines étapes (APRÈS vérification HTTP) :"
 log "  1. curl -I http://${API_DOMAIN}/api/health   ← depuis l'extérieur"
 log "  2. sudo certbot --nginx -d ${API_DOMAIN}     ← SSL uniquement si HTTP OK"
-log "  3. Éditer $APP_DIR/.env (Stripe, APP_ENCRYPTION_KEY)"
-log "  4. php $APP_DIR/scripts/seed.php             ← optionnel"
+log "  3. Éditer $APP_DIR/.env (Stripe, APP_ENCRYPTION_KEY, ADMIN_ALLOWED_IPS)"
+log "  4. SEED_CONFIRM=1 php $APP_DIR/scripts/seed.php  ← dev/staging uniquement"

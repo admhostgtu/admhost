@@ -13,6 +13,7 @@ ob_start();
     <?php endif; ?>
 
     <form method="POST" action="/register">
+        <?= csrf_field() ?>
         <div class="form-group">
             <label for="name">Nom</label>
             <input type="text" id="name" name="name" required>

@@ -9,6 +9,7 @@ namespace Admin\Controllers;
 
 use Admin\Services\ApiClient;
 use Shared\Core\Controller;
+use Shared\Core\Csrf;
 use Shared\Core\Request;
 
 class AuthController extends Controller
@@ -27,15 +28,19 @@ class AuthController extends Controller
 
     public function login(Request $request): never
     {
+        $this->validateCsrf($request);
+
         $response = $this->api->post('/api/login', [
             'email'    => $request->input('email'),
             'password' => $request->input('password'),
         ]);
 
         if (isset($response['token']) && ($response['user']['role'] ?? '') === 'admin') {
+            session_regenerate_id(true);
+            Csrf::rotate();
             $_SESSION['admin_token'] = $response['token'];
             $_SESSION['admin']       = $response['user'];
-            redirect('/admin/dashboard');
+            redirect(admin_path('dashboard'));
         }
 
         $this->view('auth.login', [
@@ -50,6 +55,6 @@ class AuthController extends Controller
             $this->api->post('/api/logout', []);
         }
         unset($_SESSION['admin'], $_SESSION['admin_token']);
-        redirect('/admin/login');
+        redirect(admin_path('login'));
     }
 }

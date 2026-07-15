@@ -5,7 +5,8 @@
 <?php if ($user): ?>
     <p>Utilisateur : <strong><?= e($user['name']) ?></strong> (<?= e($user['email']) ?>)</p>
 
-    <form method="POST" action="/admin/users/<?= e($userId) ?>/assign" class="settings-form">
+    <form method="POST" action="<?= e(admin_path('users/' . $userId . '/assign')) ?>" class="settings-form">
+        <?= csrf_field() ?>
         <div class="form-group">
             <label for="name">Nom du service</label>
             <input type="text" id="name" name="name" value="Hébergement" required>
@@ -29,7 +30,7 @@
             </label>
         </div>
         <button type="submit" class="btn btn-primary">Attribuer</button>
-        <a href="/admin/users" class="btn btn-outline">Annuler</a>
+        <a href="<?= e(admin_path('users')) ?>" class="btn btn-outline">Annuler</a>
     </form>
 <?php else: ?>
     <p>Utilisateur introuvable.</p>

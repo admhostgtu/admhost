@@ -38,6 +38,7 @@ class UserController extends Controller
         AdminAuth::check();
 
         if ($request->method() === 'POST') {
+            $this->validateCsrf($request);
             $response = $this->api->post('/api/admin/users', [
                 'name'     => $request->input('name'),
                 'email'    => $request->input('email'),
@@ -46,7 +47,7 @@ class UserController extends Controller
             ]);
 
             if (isset($response['data'])) {
-                redirect('/admin/users');
+                redirect(admin_path('users'));
             }
 
             $this->view('users.create', [
@@ -67,6 +68,7 @@ class UserController extends Controller
         AdminAuth::check();
 
         if ($request->method() === 'POST') {
+            $this->validateCsrf($request);
             $response = $this->api->post("/api/admin/users/{$id}/services", [
                 'name'      => $request->input('name'),
                 'type'      => $request->input('type', 'hosting'),
@@ -75,7 +77,7 @@ class UserController extends Controller
             ]);
 
             if (isset($response['data'])) {
-                redirect('/admin/users');
+                redirect(admin_path('users'));
             }
         }
 

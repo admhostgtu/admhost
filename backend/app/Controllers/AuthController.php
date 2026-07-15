@@ -55,6 +55,9 @@ class AuthController extends Controller
             $this->json(['errors' => $errors], 422);
         }
 
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $this->auth->assertRegisterAllowed($ip);
+
         try {
             $user = $this->auth->register(
                 $request->input('name'),

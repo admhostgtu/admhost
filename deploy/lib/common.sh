@@ -145,6 +145,30 @@ secure_env_file() {
     fi
 }
 
+# Refuse les secrets par défaut en production
+validate_production_secrets() {
+    local env_file="${1:-/var/www/admhost/.env}"
+    [ -f "$env_file" ] || return 0
+
+    local db_pass enc_key
+    db_pass=$(grep -E '^DB_PASSWORD=' "$env_file" | cut -d= -f2- | tr -d '"')
+    enc_key=$(grep -E '^APP_ENCRYPTION_KEY=' "$env_file" | cut -d= -f2- | tr -d '"')
+
+    if [ -z "$db_pass" ] || [ "$db_pass" = "CHANGE_ME" ]; then
+        fail "DB_PASSWORD invalide dans $env_file — définir export DB_PASSWORD='...' avant deploy"
+    fi
+
+    if [ -z "$enc_key" ] || [ "$enc_key" = "CHANGE_ME_64_HEX_CHARS" ]; then
+        log "WARN: APP_ENCRYPTION_KEY non configurée — chiffrement credentials désactivé"
+    fi
+
+    local admin_ips
+    admin_ips=$(grep -E '^ADMIN_ALLOWED_IPS=' "$env_file" | cut -d= -f2- | tr -d '"')
+    if [ -z "$admin_ips" ]; then
+        log "WARN: ADMIN_ALLOWED_IPS vide — accès admin bloqué en production jusqu'à configuration"
+    fi
+}
+
 # Vérification HTTP locale obligatoire
 verify_local_http() {
     local host_header="${1:-localhost}"

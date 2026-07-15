@@ -53,7 +53,7 @@ class StripeController extends Controller
 
         try {
             $result = $this->stripe->handleWebhook($payload, $signature);
-            Response::json(['received' => true, 'result' => $result])->send();
+            Response::json(['received' => true])->send();
         } catch (ApiException $e) {
             $e->render();
         }

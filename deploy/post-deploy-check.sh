@@ -1,20 +1,22 @@
 #!/bin/bash
 # =============================================================================
-# Vérification post-déploiement
-# Usage :
-#   bash deploy/post-deploy-check.sh
-#   API_URL=http://api.tondomaine.com bash deploy/post-deploy-check.sh
+# Vérification post-déploiement — AdmHost multi-domaines
+# Usage : bash deploy/post-deploy-check.sh
 # =============================================================================
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=domains.env
+[ -f "$SCRIPT_DIR/domains.env" ] && source "$SCRIPT_DIR/domains.env"
+
 PASS=0
 FAIL=0
 
-APP_URL="${APP_URL:-https://tondomaine.com}"
-API_URL="${API_URL:-https://api.tondomaine.com}"
-
-# Si HTTPS échoue, tenter HTTP (avant certbot)
+VITRINE_URL="${VITRINE_URL:-https://admhost.fr}"
+CONSOLE_URL="${CONSOLE_URL:-https://console.admhost.fr}"
+ADMIN_URL="${ADMIN_URL:-https://manage.console.admhost.fr}"
+API_URL="${API_URL:-https://api.admhost.fr}"
 HTTP_API="${API_URL/https:/http:}"
 
 check() {
@@ -36,20 +38,17 @@ check() {
 echo "=== AdmHost — Post-déploiement ==="
 echo ""
 
-# Backend — HTTP prioritaire
-check "Backend health (HTTP)"  "${HTTP_API}/api/health" "200"
-check "Backend root (HTTP)"    "${HTTP_API}/"           "200"
+check "API health"           "${HTTP_API}/api/health" "200"
+check "Vitrine accueil"      "${VITRINE_URL}/" "200"
+check "Vitrine tarifs"       "${VITRINE_URL}/pricing" "200"
+check "Console login"        "${CONSOLE_URL}/login" "200"
+check "Console register"     "${CONSOLE_URL}/register" "200"
+check "Admin login"          "${ADMIN_URL}/login" "200"
 
-# Backend HTTPS (si certbot déjà fait)
 if [ "$API_URL" != "$HTTP_API" ]; then
-    check "Backend health (HTTPS)" "$API_URL/api/health" "200"
+    check "API health HTTPS" "$API_URL/api/health" "200"
 fi
 
-# Frontend
-check "Frontend accueil"  "$APP_URL/"    "200"
-check "Frontend login"    "$APP_URL/login" "200"
-
-# JSON
 BODY=$(curl -s --max-time 10 "${HTTP_API}/api/health" 2>/dev/null || echo "")
 if echo "$BODY" | grep -q '"status"'; then
     echo "✅ [OK]   API JSON valide"

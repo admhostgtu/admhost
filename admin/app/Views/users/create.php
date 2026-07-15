@@ -6,7 +6,8 @@
     <div class="alert alert-error"><?= e($error) ?></div>
 <?php endif; ?>
 
-<form method="POST" action="/admin/users/create" class="settings-form">
+<form method="POST" action="<?= e(admin_path('users/create')) ?>" class="settings-form">
+    <?= csrf_field() ?>
     <div class="form-group">
         <label for="name">Nom</label>
         <input type="text" id="name" name="name" required>
@@ -27,7 +28,7 @@
         </select>
     </div>
     <button type="submit" class="btn btn-primary">Créer</button>
-    <a href="/admin/users" class="btn btn-outline">Annuler</a>
+    <a href="<?= e(admin_path('users')) ?>" class="btn btn-outline">Annuler</a>
 </form>
 
 <?php

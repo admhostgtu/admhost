@@ -36,7 +36,7 @@ class AuthService
         }
 
         if ($this->users->findByEmail($email)) {
-            throw new ApiException('Cet email est déjà utilisé.', 409);
+            throw new ApiException('Impossible de créer le compte avec ces informations.', 409);
         }
 
         return $this->users->create([
@@ -106,6 +106,7 @@ class AuthService
         }
 
         $user = $this->users->findPublic($result['user_id']);
+        $this->assertActiveUser($user);
 
         return [
             'token'      => $result['token'],
@@ -121,7 +122,29 @@ class AuthService
             return null;
         }
 
-        return $this->users->findPublic($userId);
+        $user = $this->users->findPublic($userId);
+        if (!$user || ($user['status'] ?? '') !== 'active') {
+            $this->sessions->destroy($token);
+            return null;
+        }
+
+        if (!empty($user['locked_until']) && strtotime((string) $user['locked_until']) > time()) {
+            $this->sessions->destroy($token);
+            return null;
+        }
+
+        return $user;
+    }
+
+    private function assertActiveUser(?array $user): void
+    {
+        if (!$user || ($user['status'] ?? '') !== 'active') {
+            throw new ApiException('Compte suspendu ou inactif.', 403);
+        }
+
+        if (!empty($user['locked_until']) && strtotime((string) $user['locked_until']) > time()) {
+            throw new ApiException('Compte temporairement verrouillé.', 429);
+        }
     }
 
     /**
@@ -138,6 +161,14 @@ class AuthService
         }
 
         return null;
+    }
+
+    /**
+     * Limite les inscriptions par IP (anti-spam).
+     */
+    public function assertRegisterAllowed(string $ip): void
+    {
+        $this->rateLimit->assertIpActionLimit($ip, 'register', 10, 3600);
     }
 
     /**

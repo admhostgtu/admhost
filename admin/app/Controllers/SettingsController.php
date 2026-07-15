@@ -37,8 +37,9 @@ class SettingsController extends Controller
     public function update(Request $request): never
     {
         AdminAuth::check();
+        $this->validateCsrf($request);
 
         // TODO : sauvegarder les paramètres en base de données
-        redirect('/admin/settings');
+        redirect(admin_path('settings'));
     }
 }

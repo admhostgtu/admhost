@@ -15,7 +15,7 @@ class AdminAuth
     public static function check(): void
     {
         if (empty($_SESSION['admin'])) {
-            redirect('/admin/login');
+            redirect(admin_path('login'));
         }
 
         $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';

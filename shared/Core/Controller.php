@@ -41,4 +41,13 @@ abstract class Controller
         }
         return empty($errors) ? null : $errors;
     }
+
+    /** Valide le token CSRF sur les requêtes POST/PUT/DELETE. */
+    protected function validateCsrf(Request $request): void
+    {
+        if (!in_array($request->method(), ['POST', 'PUT', 'DELETE'], true)) {
+            return;
+        }
+        Csrf::assertValid($request->input('_csrf'));
+    }
 }

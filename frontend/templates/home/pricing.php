@@ -17,7 +17,7 @@ ob_start();
                         <li><?= e($feature) ?></li>
                     <?php endforeach; ?>
                 </ul>
-                <a href="/register" class="btn btn-primary">Choisir</a>
+                <a href="<?= e(console_url('/register')) ?>" class="btn btn-primary">Choisir</a>
             </div>
         <?php endforeach; ?>
     </div>
