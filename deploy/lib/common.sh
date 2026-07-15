@@ -152,6 +152,16 @@ EOSQL
     ok "MySQL : user '${db_user}'@'localhost' configuré"
 }
 
+# Met à jour une clé .env sans casser sur caractères spéciaux
+env_set() {
+    local file="$1" key="$2" value="$3"
+    local tmp
+    tmp=$(mktemp)
+    grep -v "^${key}=" "$file" > "$tmp" 2>/dev/null || true
+    printf '%s=%s\n' "$key" "$value" >> "$tmp"
+    mv "$tmp" "$file"
+}
+
 # Sécurise le fichier .env
 secure_env_file() {
     local env_file="${1:-/var/www/admhost/.env}"
@@ -168,7 +178,9 @@ validate_production_secrets() {
     [ -f "$env_file" ] || return 0
 
     local db_pass enc_key
-    db_pass=$(grep -E '^DB_PASSWORD=' "$env_file" | cut -d= -f2- | tr -d '"')
+    db_pass=$(grep -E '^DB_PASSWORD=' "$env_file" 2>/dev/null | cut -d= -f2- | tr -d '"')
+    [ -z "$db_pass" ] && db_pass=$(grep -E '^DB_PASS=' "$env_file" 2>/dev/null | cut -d= -f2- | tr -d '"')
+    [ -z "$db_pass" ] && db_pass="${DB_PASSWORD:-}"
     enc_key=$(grep -E '^APP_ENCRYPTION_KEY=' "$env_file" | cut -d= -f2- | tr -d '"')
 
     if [ -z "$db_pass" ] || [ "$db_pass" = "CHANGE_ME" ]; then
