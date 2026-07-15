@@ -71,6 +71,7 @@ setup_vps_nginx() {
     ln -sf /etc/nginx/sites-available/admhost-console /etc/nginx/sites-enabled/
     ln -sf /etc/nginx/sites-available/admhost-admin /etc/nginx/sites-enabled/
     rm -f /etc/nginx/sites-enabled/default
+    rm -f /etc/nginx/sites-enabled/api.scaleway.conf
 
     "$(nginx_bin)" -t || fail "Configuration Nginx invalide"
     systemctl reload nginx
@@ -102,15 +103,15 @@ verify_vps_sites() {
 
     log "Vérification des 4 sites..."
 
-    curl -sf -I "http://127.0.0.1/" -H "Host: ${vitrine_domain}" >/dev/null \
+    curl -sf -o /dev/null "http://127.0.0.1/" -H "Host: ${vitrine_domain}" \
         || fail "Vitrine HTTP failed (${vitrine_domain})"
     ok "Vitrine OK : http://${vitrine_domain}"
 
-    curl -sf -I "http://127.0.0.1/login" -H "Host: ${console_domain}" >/dev/null \
+    curl -sf -o /dev/null "http://127.0.0.1/login" -H "Host: ${console_domain}" \
         || fail "Console HTTP failed (${console_domain})"
     ok "Console OK : http://${console_domain}"
 
-    curl -sf -I "http://127.0.0.1/login" -H "Host: ${admin_domain}" >/dev/null \
+    curl -sf -o /dev/null "http://127.0.0.1/login" -H "Host: ${admin_domain}" \
         || fail "Admin HTTP failed (${admin_domain})"
     ok "Admin OK : http://${admin_domain}"
 

@@ -210,15 +210,15 @@ verify_local_http() {
     local host_header="${1:-localhost}"
     local path="${2:-/api/health}"
 
-    log "Vérification HTTP : curl -I http://localhost${path}"
-    if curl -sf -I "http://127.0.0.1${path}" -H "Host: ${host_header}" >/dev/null 2>&1; then
+    log "Vérification HTTP : curl http://localhost${path}"
+    if curl -sf -o /dev/null "http://127.0.0.1${path}" -H "Host: ${host_header}" 2>/dev/null; then
         ok "API disponible sur http://localhost${path}"
-        curl -I "http://127.0.0.1${path}" -H "Host: ${host_header}" 2>/dev/null | head -5
+        curl -sI "http://127.0.0.1${path}" -H "Host: ${host_header}" 2>/dev/null | head -5
         return 0
     fi
 
     # Retry sans Host header (default_server)
-    if curl -sf -I "http://127.0.0.1${path}" >/dev/null 2>&1; then
+    if curl -sf -o /dev/null "http://127.0.0.1${path}" 2>/dev/null; then
         ok "API disponible sur http://localhost${path}"
         return 0
     fi
