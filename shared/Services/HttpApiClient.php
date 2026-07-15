@@ -56,17 +56,28 @@ class HttpApiClient
             $headers .= 'Authorization: Bearer ' . $bearerToken . "\r\n";
         }
 
-        $options = [
-            'http' => [
-                'method'        => $method,
-                'header'        => $headers,
-                'timeout'       => 15,
-                'ignore_errors' => true,
-            ],
+        $httpOptions = [
+            'method'        => $method,
+            'header'        => $headers,
+            'timeout'       => 15,
+            'ignore_errors' => true,
         ];
 
         if (in_array($method, ['POST', 'PUT'], true) && !empty($data)) {
-            $options['http']['content'] = json_encode($data);
+            $httpOptions['content'] = json_encode($data);
+        }
+
+        $options = ['http' => $httpOptions];
+
+        // Appels internes HTTPS (127.0.0.1) — certificat Let's Encrypt non valide en local
+        if (str_starts_with($this->baseUrl, 'https://127.0.0.1') || str_starts_with($this->baseUrl, 'https://localhost')) {
+            $options['ssl'] = [
+                'verify_peer'       => false,
+                'verify_peer_name'  => false,
+                'allow_self_signed' => true,
+                'SNI_enabled'       => true,
+                'peer_name'         => $this->hostHeader ?? 'localhost',
+            ];
         }
 
         $context = stream_context_create($options);
