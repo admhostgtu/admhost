@@ -2,6 +2,7 @@
 
 <h1>Abonnements</h1>
 
+<div class="table-wrap">
 <table class="admin-table">
     <thead>
         <tr>
@@ -30,6 +31,7 @@
         <?php endif; ?>
     </tbody>
 </table>
+</div>
 
 <?php
 $content = ob_get_clean();

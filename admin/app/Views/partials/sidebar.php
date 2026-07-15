@@ -3,9 +3,10 @@
  * Partial : sidebar admin.
  */
 ?>
-<aside class="sidebar">
-    <div class="sidebar-brand">AdmHost Admin</div>
-    <nav class="sidebar-nav">
+<div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+<aside class="sidebar" id="admin-sidebar">
+    <div class="sidebar-brand">AdmHost <span>Admin</span></div>
+    <nav class="sidebar-nav" aria-label="Navigation admin">
         <a href="<?= e(admin_path('dashboard')) ?>" class="sidebar-link">Dashboard</a>
         <a href="<?= e(admin_path('users')) ?>" class="sidebar-link">Utilisateurs</a>
         <a href="<?= e(admin_path('subscriptions')) ?>" class="sidebar-link">Abonnements</a>

@@ -5,6 +5,7 @@
     <a href="<?= e(admin_path('users/create')) ?>" class="btn btn-primary">+ Créer</a>
 </div>
 
+<div class="table-wrap">
 <table class="admin-table">
     <thead>
         <tr>
@@ -35,7 +36,4 @@
         <?php endif; ?>
     </tbody>
 </table>
-
-<?php
-$content = ob_get_clean();
-include __DIR__ . '/../layouts/admin.php';
+</div>

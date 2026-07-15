@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#14100d">
     <title><?= e($title ?? 'AdmHost') ?> — <?= e(env('APP_NAME', 'AdmHost')) ?></title>
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>

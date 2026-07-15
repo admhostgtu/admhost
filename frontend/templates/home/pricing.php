@@ -6,7 +6,8 @@ ob_start();
 ?>
 
 <section class="pricing">
-    <h1>Nos tarifs</h1>
+    <h1>Nos offres</h1>
+    <p class="pricing-intro">Des formules claires, sans engagement caché. Choisissez celle qui correspond à votre usage.</p>
     <div class="pricing-grid">
         <?php foreach ($plans as $plan): ?>
             <div class="pricing-card">
@@ -17,7 +18,7 @@ ob_start();
                         <li><?= e($feature) ?></li>
                     <?php endforeach; ?>
                 </ul>
-                <a href="<?= e(console_url('/register')) ?>" class="btn btn-primary">Choisir</a>
+                <a href="<?= e(console_url('/register')) ?>" class="btn btn-primary btn-block">Choisir cette offre</a>
             </div>
         <?php endforeach; ?>
     </div>

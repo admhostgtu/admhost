@@ -27,3 +27,5 @@ Thumbs.db
 
 # Deploy temp (secrets)
 deploy/automated/_remote_deploy.sh
+deploy/automated/_vps_deploy_now.sh
+deploy/automated/_create_users.sh

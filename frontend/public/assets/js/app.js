@@ -1,10 +1,26 @@
 /**
- * JavaScript du Frontend public.
- * Interactions côté client (validation, UX).
+ * JavaScript frontend — navigation mobile et validation formulaires.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Validation basique des formulaires avant soumission
+    const toggle = document.querySelector('.nav-toggle');
+    const nav = document.querySelector('.nav-links');
+
+    if (toggle && nav) {
+        toggle.addEventListener('click', () => {
+            const open = toggle.getAttribute('aria-expanded') === 'true';
+            toggle.setAttribute('aria-expanded', open ? 'false' : 'true');
+            nav.classList.toggle('is-open', !open);
+        });
+
+        nav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                toggle.setAttribute('aria-expanded', 'false');
+                nav.classList.remove('is-open');
+            });
+        });
+    }
+
     document.querySelectorAll('form').forEach(form => {
         form.addEventListener('submit', (e) => {
             const required = form.querySelectorAll('[required]');
@@ -12,10 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             required.forEach(field => {
                 if (!field.value.trim()) {
-                    field.style.borderColor = '#dc2626';
+                    field.style.borderColor = '#ef4444';
                     valid = false;
                 } else {
-                    field.style.borderColor = '#cbd5e1';
+                    field.style.borderColor = '';
                 }
             });
 

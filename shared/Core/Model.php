@@ -8,9 +8,11 @@ declare(strict_types=1);
 
 namespace Shared\Core;
 
+use PDO;
+
 abstract class Model
 {
-    protected Database $db;
+    protected PDO $db;
     protected string $table;
 
     public function __construct()
