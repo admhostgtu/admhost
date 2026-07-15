@@ -9,6 +9,13 @@ require_root() {
         echo "Please run as root or with sudo"
         exit 1
     fi
+    # su -c peut fournir un PATH minimal sans /usr/sbin
+    export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${PATH:-}"
+}
+
+# nginx (souvent dans /usr/sbin, absent du PATH minimal)
+nginx_bin() {
+    command -v nginx 2>/dev/null || echo /usr/sbin/nginx
 }
 
 # Mode debug déploiement : DEPLOY_DEBUG=1 bash deploy/deploy-backend.sh

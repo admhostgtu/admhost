@@ -60,11 +60,16 @@ try {
     $sql = file_get_contents($schemaFile);
     foreach (preg_split('/;\s*\n/', $sql) as $statement) {
         $statement = trim($statement);
-        if ($statement === '' || str_starts_with($statement, '--')) {
+        if ($statement === '') {
             continue;
         }
-        if (preg_match('/^(SET|CREATE TABLE IF NOT EXISTS)/i', $statement)) {
-            $db->exec($statement);
+        // Retirer les lignes de commentaire (-- ...) pour ne pas ignorer un CREATE TABLE
+        $executable = trim(preg_replace('/^--.*$/m', '', $statement));
+        if ($executable === '') {
+            continue;
+        }
+        if (preg_match('/^(SET|CREATE TABLE IF NOT EXISTS)/i', $executable)) {
+            $db->exec($executable);
         }
     }
     migrateLog('[OK] Schéma de base appliqué (CREATE TABLE IF NOT EXISTS)');

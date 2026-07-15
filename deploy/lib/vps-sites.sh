@@ -72,7 +72,7 @@ setup_vps_nginx() {
     ln -sf /etc/nginx/sites-available/admhost-admin /etc/nginx/sites-enabled/
     rm -f /etc/nginx/sites-enabled/default
 
-    nginx -t || fail "Configuration Nginx invalide"
+    "$(nginx_bin)" -t || fail "Configuration Nginx invalide"
     systemctl reload nginx
 
     ok "Nginx : 4 vhosts actifs"
