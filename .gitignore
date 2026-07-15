@@ -25,5 +25,5 @@ storage/backups/*
 .DS_Store
 Thumbs.db
 
-# PHP
-vendor/
+# Deploy temp (secrets)
+deploy/automated/_remote_deploy.sh

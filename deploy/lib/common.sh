@@ -27,23 +27,40 @@ fail() { echo "❌ [ERREUR] $*" >&2; exit 1; }
 # Installe PHP 8.3-FPM (+ extensions) avec repli versions antérieures
 install_php_fpm() {
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update -qq
 
-    log "Installation PHP-FPM 8.3..."
+    # Détecter PHP-FPM déjà installé
+    for svc in php8.4-fpm php8.3-fpm php8.2-fpm php-fpm; do
+        if systemctl list-unit-files "${svc}.service" 2>/dev/null | grep -qE 'enabled|disabled'; then
+            PHP_FPM_SERVICE="$svc"
+            log "PHP-FPM existant détecté : $svc"
+            systemctl enable "$PHP_FPM_SERVICE" 2>/dev/null || true
+            systemctl restart "$PHP_FPM_SERVICE" 2>/dev/null || true
+            export PHP_FPM_SERVICE
+            ok "PHP-FPM actif : $PHP_FPM_SERVICE"
+            return 0
+        fi
+    done
+
+    apt-get update -qq
+    log "Installation PHP-FPM 8.4+..."
     if apt-get install -y -qq \
+        php8.4-fpm php8.4-cli php8.4-mysql php8.4-curl \
+        php8.4-mbstring php8.4-xml php8.4-zip 2>/dev/null; then
+        PHP_FPM_SERVICE="php8.4-fpm"
+    elif apt-get install -y -qq \
         php8.3-fpm php8.3-cli php8.3-mysql php8.3-curl \
         php8.3-mbstring php8.3-xml php8.3-zip 2>/dev/null; then
         PHP_FPM_SERVICE="php8.3-fpm"
     else
-        log "PHP 8.3 indisponible — repli php-fpm générique..."
+        log "Repli php-fpm générique..."
         apt-get install -y -qq \
             php-fpm php-cli php-mysql php-curl php-mbstring php-xml php-zip
         PHP_FPM_SERVICE="php-fpm"
     fi
 
-    systemctl enable "$PHP_FPM_SERVICE"
-    systemctl start "$PHP_FPM_SERVICE"
-    systemctl restart "$PHP_FPM_SERVICE"
+    systemctl enable "$PHP_FPM_SERVICE" 2>/dev/null || true
+    systemctl start "$PHP_FPM_SERVICE" 2>/dev/null || true
+    systemctl restart "$PHP_FPM_SERVICE" 2>/dev/null || true
 
     ok "PHP-FPM installé : $PHP_FPM_SERVICE"
     export PHP_FPM_SERVICE
@@ -53,9 +70,9 @@ install_php_fpm() {
 detect_php_fpm_socket() {
     local sock=""
     for candidate in \
+        /run/php/php8.4-fpm.sock \
+        /var/run/php/php8.4-fpm.sock \
         /run/php/php8.3-fpm.sock \
-        /var/run/php/php8.3-fpm.sock \
-        /run/php/php8.2-fpm.sock \
         /var/run/php/php8.2-fpm.sock \
         /run/php/php8.1-fpm.sock \
         /var/run/php/php8.1-fpm.sock \
